@@ -95,3 +95,10 @@ Default demo credentials created automatically:
 - `GET /api/colors/<id>`: Get dominant color palette.
 - `GET /api/reports/<id>`: Download PDF AI Report.
 - Interactive API Docs available at `http://127.0.0.1:5000/apidocs`.
+
+<img width="1364" height="636" alt="image" src="https://github.com/user-attachments/assets/bbe4183f-f125-442f-abe2-96d9699341fa" />
+<img width="1354" height="634" alt="image" src="https://github.com/user-attachments/assets/1d7629ee-7ab3-4518-9e5b-c267557d9935" />
+<img width="1365" height="631" alt="image" src="https://github.com/user-attachments/assets/324f9095-adf7-40e1-8067-6f489b233d32" />
+<img width="1365" height="637" alt="image" src="https://github.com/user-attachments/assets/29805252-9ff1-4282-89a5-b2c08b829419" />
+<img width="1365" height="639" alt="image" src="https://github.com/user-attachments/assets/ef1d476e-3039-4a28-a813-2f8594c39771" />
+<img width="432" height="495" alt="image" src="https://github.com/user-attachments/assets/3046adf9-732d-4f31-99e8-a264c1781b58" />
