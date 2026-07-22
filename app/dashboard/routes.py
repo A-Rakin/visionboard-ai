@@ -160,7 +160,8 @@ def search():
                 scored_list.append((sim, emb.image))
         
         scored_list.sort(key=lambda x: x[0], reverse=True)
-        results = [{'sim_score': round(s[0] * 100, 1), 'image': im} for s, im in scored_list if s[0] > 0.15]
+        results = [{'sim_score': round(s * 100, 1), 'image': im} for s, im in scored_list if s > 0.15]
+
 
     elif color_hex:
         # Reverse Color Search
