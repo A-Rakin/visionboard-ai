@@ -211,6 +211,43 @@ def download_report(image_id):
     generate_ai_pdf_report(img, pdf_path)
     return send_file(pdf_path, as_attachment=True, download_name=f"VisionBoard_AI_Report_{img.id}.pdf")
 
+@dashboard_bp.route('/image/<int:image_id>/delete', methods=['POST'])
+@login_required
+def delete_image(image_id):
+    img = Image.query.filter_by(id=image_id, user_id=current_user.id).first_or_404()
+    
+    # 1. Remove files from disk
+    if os.path.exists(img.file_path):
+        try:
+            os.remove(img.file_path)
+        except Exception:
+            pass
+
+    if img.embedding and os.path.exists(img.embedding.embedding_path):
+        try:
+            os.remove(img.embedding.embedding_path)
+        except Exception:
+            pass
+
+    pdf_filename = f"report_image_{img.id}.pdf"
+    pdf_path = os.path.join(current_app.config['REPORT_FOLDER'], pdf_filename)
+    if os.path.exists(pdf_path):
+        try:
+            os.remove(pdf_path)
+        except Exception:
+            pass
+
+    # 2. Delete DB record
+    db.session.delete(img)
+    db.session.commit()
+
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
+        return jsonify({'success': True, 'message': 'Image deleted successfully!'})
+
+    flash('Image deleted successfully from library.', 'success')
+    return redirect(url_for('dashboard.feed'))
+
 @dashboard_bp.route('/uploads/<filename>')
 def serve_upload(filename):
     return send_file(os.path.join(current_app.config['UPLOAD_FOLDER'], filename))
+

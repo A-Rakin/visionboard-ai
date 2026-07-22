@@ -62,13 +62,19 @@
     
     <!-- Action Bar -->
     <div class="glass-card p-3 mb-4 d-flex align-items-center justify-content-between flex-wrap gap-2">
-      <button class="btn btn-outline-light btn-sm d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#addToCollectionModal">
-        <i class="bi bi-folder-plus"></i> Add to Collection
-      </button>
+      <div class="d-flex align-items-center gap-2">
+        <button class="btn btn-outline-light btn-sm d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#addToCollectionModal">
+          <i class="bi bi-folder-plus"></i> Collection
+        </button>
+        <button class="btn btn-outline-danger btn-sm d-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#deleteImageModal">
+          <i class="bi bi-trash-fill"></i> Delete
+        </button>
+      </div>
       <a href="{{ url_for('dashboard.download_report', image_id=image.id) }}" class="btn btn-gradient btn-sm d-flex align-items-center gap-2">
         <i class="bi bi-file-earmark-pdf-fill"></i> Download AI Report (PDF)
       </a>
     </div>
+
 
     <!-- 1. BLIP AI Caption -->
     <div class="glass-card p-4 mb-4">
@@ -189,7 +195,29 @@
     </div>
   </div>
 </div>
+<!-- Modal: Delete Image -->
+<div class="modal fade" id="deleteImageModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content glass-card border-danger text-white">
+      <div class="modal-header border-secondary border-opacity-25">
+        <h5 class="modal-title font-heading text-danger"><i class="bi bi-exclamation-triangle-fill me-2"></i>Delete Image</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p class="mb-1 fw-semibold">Are you sure you want to delete this image?</p>
+        <p class="text-muted small mb-0">This will permanently remove the image, AI bounding box data, BLIP caption, EasyOCR text, color palette, and vector embeddings from your library.</p>
+      </div>
+      <div class="modal-footer border-secondary border-opacity-25">
+        <button type="button" class="btn btn-dark" data-bs-dismiss="modal">Cancel</button>
+        <form action="{{ url_for('dashboard.delete_image', image_id=image.id) }}" method="POST">
+          <button type="submit" class="btn btn-danger">Confirm Delete</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}
+
 
 {% block extra_js %}
 <script src="{{ url_for('static', filename='js/boundingbox.js') }}"></script>
