@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}VisionBoard AI — Visual Search Engine{% endblock %}</title>
+  
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <!-- Custom Glassmorphism CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+  <!-- Navigation Sidebar (For authenticated routes) -->
+  {% if current_user.is_authenticated %}
+  <aside class="sidebar d-flex flex-column justify-content-between">
+    <div>
+      <a href="{{ url_for('dashboard.feed') }}" class="d-flex align-items-center gap-2 text-decoration-none mb-4 ps-2">
+        <i class="bi bi-eye-fill fs-3 text-gradient"></i>
+        <span class="fs-4 brand-title text-gradient">VisionBoard AI</span>
+      </a>
+
+      <nav class="nav flex-column">
+        <a href="{{ url_for('dashboard.feed') }}" class="nav-link-custom {% if request.endpoint == 'dashboard.feed' %}active{% endif %}">
+          <i class="bi bi-grid-fill"></i>
+          <span>Dashboard</span>
+        </a>
+        <a href="{{ url_for('dashboard.feed') }}#uploadSection" class="nav-link-custom">
+          <i class="bi bi-cloud-arrow-up-fill"></i>
+          <span>Upload Image</span>
+        </a>
+        <a href="{{ url_for('dashboard.favorites') }}" class="nav-link-custom {% if request.endpoint == 'dashboard.favorites' %}active{% endif %}">
+          <i class="bi bi-heart-fill"></i>
+          <span>My Favorites</span>
+        </a>
+        <a href="{{ url_for('dashboard.collections') }}" class="nav-link-custom {% if request.endpoint == 'dashboard.collections' or request.endpoint == 'dashboard.collection_detail' %}active{% endif %}">
+          <i class="bi bi-folder-fill"></i>
+          <span>Collections</span>
+        </a>
+        <a href="{{ url_for('dashboard.search') }}" class="nav-link-custom {% if request.endpoint == 'dashboard.search' %}active{% endif %}">
+          <i class="bi bi-search"></i>
+          <span>AI Visual Search</span>
+        </a>
+        <a href="{{ url_for('dashboard.analytics') }}" class="nav-link-custom {% if request.endpoint == 'dashboard.analytics' %}active{% endif %}">
+          <i class="bi bi-pie-chart-fill"></i>
+          <span>Analytics</span>
+        </a>
+        <a href="/apidocs" target="_blank" class="nav-link-custom">
+          <i class="bi bi-code-slash"></i>
+          <span>REST API Docs</span>
+        </a>
+      </nav>
+    </div>
+
+    <!-- User Profile & Logout Footer -->
+    <div class="glass-card p-3 d-flex align-items-center justify-content-between mt-auto">
+      <div class="d-flex align-items-center gap-2">
+        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold" style="width:38px; height:38px;">
+          {{ current_user.username[0].upper() }}
+        </div>
+        <div class="text-truncate" style="max-width: 120px;">
+          <div class="fw-bold text-white small">{{ current_user.username }}</div>
+          <div class="text-muted small" style="font-size: 0.75rem;">{{ current_user.email }}</div>
+        </div>
+      </div>
+      <a href="{{ url_for('auth.logout') }}" class="text-muted hover-white fs-5" title="Logout">
+        <i class="bi bi-box-arrow-right"></i>
+      </a>
+    </div>
+  </aside>
+  {% endif %}
+
+  <!-- Main Workspace Area -->
+  <main class="{% if current_user.is_authenticated %}main-content{% else %}container py-4{% endif %}">
+    
+    <!-- Top Header Search Bar for Logged In Users -->
+    {% if current_user.is_authenticated %}
+    <header class="d-flex align-items-center justify-content-between mb-4 pb-2 border-bottom border-secondary border-opacity-25">
+      <form action="{{ url_for('dashboard.search') }}" method="GET" class="flex-grow-1 me-4" style="max-width: 600px;">
+        <div class="position-relative">
+          <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+          <input type="text" name="q" class="form-control glass-input ps-5" placeholder="Natural language AI search (e.g. 'Laptop on office desk', 'Red sports car')...">
+        </div>
+      </form>
+      <div class="d-flex align-items-center gap-3">
+        <a href="{{ url_for('dashboard.feed') }}#uploadSection" class="btn btn-gradient btn-sm d-flex align-items-center gap-2">
+          <i class="bi bi-plus-lg"></i>
+          <span>Upload Image</span>
+        </a>
+      </div>
+    </header>
+    {% endif %}
+
+    <!-- Flash Notifications Container -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} alert-dismissible fade show glass-card mb-4" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container position-fixed bottom-0 end-0 p-3" id="toastContainer" style="z-index: 1050;"></div>
+
+  <!-- Bootstrap 5 JS Bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/bootstrap.bundle.min.js"></script>
+  <!-- Main Application JS -->
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

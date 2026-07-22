@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}{{ collection.collection_name }} — Collection Detail{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-4">
+  <div>
+    <a href="{{ url_for('dashboard.collections') }}" class="text-muted text-decoration-none small mb-2 d-inline-block">
+      <i class="bi bi-arrow-left me-1"></i> Back to Collections
+    </a>
+    <h3 class="text-white font-heading mb-0"><i class="bi bi-folder-fill text-cyan me-2"></i>{{ collection.collection_name }}</h3>
+    <p class="text-muted small mb-0">{{ collection.description or 'Folder containing user curated images.' }}</p>
+  </div>
+  <span class="badge bg-primary bg-opacity-25 text-cyan fs-6">{{ images|length }} Images</span>
+</div>
+
+{% if images %}
+<section class="masonry-grid">
+  {% for img in images %}
+  <div class="masonry-item glass-card">
+    <img src="{{ url_for('dashboard.serve_upload', filename=img.image_name) }}" alt="{{ img.original_filename }}">
+    <div class="masonry-overlay">
+      <div class="d-flex justify-content-between align-items-center">
+        <span class="badge bg-dark bg-opacity-75 text-white">Quality: {{ img.quality_score }}/100</span>
+      </div>
+      <div>
+        <p class="text-white small fw-semibold mb-1">{{ img.captions[0].generated_caption if img.captions else img.original_filename }}</p>
+        <a href="{{ url_for('dashboard.image_detail', image_id=img.id) }}" class="btn btn-sm btn-gradient py-1 px-3 w-100 mt-2">
+          View Insights
+        </a>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</section>
+{% else %}
+<div class="text-center py-5 glass-card">
+  <i class="bi bi-images display-1 text-muted opacity-50 mb-3"></i>
+  <h4 class="text-white font-heading">This Collection is Empty</h4>
+  <p class="text-muted">Add images to this folder from any image detail page.</p>
+</div>
+{% endif %}
+{% endblock %}

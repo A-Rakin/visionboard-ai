@@ -1,0 +1,202 @@
+{% extends "base.html" %}
+
+{% block title %}{{ image.original_filename }} — VisionBoard AI Insights{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+  <!-- Left Column: Interactive Image & Canvas Box -->
+  <div class="col-lg-7">
+    <div class="glass-card p-4 position-relative">
+      <div class="d-flex align-items-center justify-content-between mb-3">
+        <h5 class="text-white font-heading mb-0"><i class="bi bi-eye text-cyan me-2"></i>Visual Canvas Analysis</h5>
+        <div class="d-flex align-items-center gap-2">
+          {% if image.is_duplicate %}
+            <span class="badge bg-warning text-dark"><i class="bi bi-exclamation-triangle-fill me-1"></i>Near Duplicate</span>
+          {% endif %}
+          <button class="btn btn-sm btn-dark btn-favorite border border-secondary" data-image-id="{{ image.id }}" title="Toggle Favorite">
+            <i class="bi {% if image.is_favorite %}bi-heart-fill text-danger{% else %}bi-heart{% endif %}"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Image Canvas Box -->
+      <div class="position-relative overflow-hidden rounded-3 border border-secondary border-opacity-25 bg-black text-center" style="min-height: 380px;">
+        <img id="detailImage" src="{{ url_for('dashboard.serve_upload', filename=image.image_name) }}" class="img-fluid rounded-3" alt="{{ image.original_filename }}" style="max-height: 520px; object-fit: contain;">
+        <canvas id="boundingBoxCanvas" class="position-absolute top-0 start-0 pointer-events-none" style="width: 100%; height: 100%;"></canvas>
+      </div>
+
+      <!-- Hover Hint -->
+      <p class="text-muted small text-center mt-2 mb-0">
+        <i class="bi bi-cursor-fill me-1 text-cyan"></i> Hover over object tags below to highlight corresponding bounding boxes on the canvas.
+      </p>
+    </div>
+
+    <!-- Google Lens Style: Similar Images Grid -->
+    <div class="glass-card p-4 mt-4">
+      <div class="d-flex align-items-center justify-content-between mb-3">
+        <h5 class="text-white font-heading mb-0"><i class="bi bi-diagram-3-fill text-gradient me-2"></i>Visually Similar Images (Google Lens Engine)</h5>
+        <span class="badge bg-secondary bg-opacity-50">512-d CLIP Cosine Similarity</span>
+      </div>
+
+      {% if similar_images %}
+      <div class="row row-cols-2 row-cols-md-4 g-3">
+        {% for item in similar_images %}
+        <div class="col">
+          <a href="{{ url_for('dashboard.image_detail', image_id=item.image.id) }}" class="text-decoration-none">
+            <div class="glass-card p-2 h-100 text-center hover-glow">
+              <img src="{{ url_for('dashboard.serve_upload', filename=item.image.image_name) }}" class="img-fluid rounded-2 mb-2" style="height: 110px; object-fit: cover; width: 100%;" alt="Similar">
+              <span class="badge bg-cyan bg-opacity-25 text-cyan small">{{ item.sim_score }}% Match</span>
+            </div>
+          </a>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+        <p class="text-muted small mb-0">No similar images found in library yet. Upload more photos to populate visual clusters!</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Right Column: Multi-Model AI Intelligence Data -->
+  <div class="col-lg-5">
+    
+    <!-- Action Bar -->
+    <div class="glass-card p-3 mb-4 d-flex align-items-center justify-content-between flex-wrap gap-2">
+      <button class="btn btn-outline-light btn-sm d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#addToCollectionModal">
+        <i class="bi bi-folder-plus"></i> Add to Collection
+      </button>
+      <a href="{{ url_for('dashboard.download_report', image_id=image.id) }}" class="btn btn-gradient btn-sm d-flex align-items-center gap-2">
+        <i class="bi bi-file-earmark-pdf-fill"></i> Download AI Report (PDF)
+      </a>
+    </div>
+
+    <!-- 1. BLIP AI Caption -->
+    <div class="glass-card p-4 mb-4">
+      <div class="d-flex align-items-center justify-content-between mb-2">
+        <h6 class="text-muted text-uppercase small mb-0"><i class="bi bi-chat-left-quote-fill text-cyan me-2"></i>BLIP AI Caption</h6>
+        <button class="btn btn-sm btn-dark btn-copy" data-copy-target="captionText" title="Copy Caption">
+          <i class="bi bi-clipboard"></i> Copy
+        </button>
+      </div>
+      <p id="captionText" class="fs-5 fw-semibold text-white mb-0">
+        {% if image.captions %}
+          {{ image.captions[0].generated_caption }}
+        {% else %}
+          Generating caption...
+        {% endif %}
+      </p>
+    </div>
+
+    <!-- 2. YOLOv8 Objects Detected -->
+    <div class="glass-card p-4 mb-4">
+      <h6 class="text-muted text-uppercase small mb-3"><i class="bi bi-box-seam-fill text-warning me-2"></i>Detected Objects (YOLOv8)</h6>
+      {% if image.objects %}
+        <div class="d-flex flex-wrap gap-2">
+          {% for obj in image.objects %}
+          <span class="badge bg-dark border border-secondary text-white p-2 object-tag-badge" data-object-index="{{ loop.index0 }}" style="cursor: pointer;">
+            <i class="bi bi-tag-fill me-1 text-cyan"></i> {{ obj.object_name }} 
+            <small class="text-muted">({{ (obj.confidence * 100)|int }}%)</small>
+          </span>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="text-muted small mb-0">No specific object bounding boxes detected.</p>
+      {% endif %}
+    </div>
+
+    <!-- 3. EasyOCR Text Extraction -->
+    <div class="glass-card p-4 mb-4">
+      <div class="d-flex align-items-center justify-content-between mb-2">
+        <h6 class="text-muted text-uppercase small mb-0"><i class="bi bi-fonts text-success me-2"></i>Extracted Text (EasyOCR)</h6>
+        {% if image.texts %}
+        <button class="btn btn-sm btn-dark btn-copy" data-copy-target="ocrText" title="Copy Text">
+          <i class="bi bi-clipboard"></i> Copy
+        </button>
+        {% endif %}
+      </div>
+      <div id="ocrText">
+        {% if image.texts %}
+          {% for t in image.texts %}
+            <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-50 p-2 me-1 mb-1">{{ t.text }}</span>
+          {% endfor %}
+        {% else %}
+          <p class="text-muted small mb-0">No text detected in this image.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- 4. Dominant Colors Palette -->
+    <div class="glass-card p-4 mb-4">
+      <h6 class="text-muted text-uppercase small mb-3"><i class="bi bi-palette-fill text-pink me-2"></i>Dominant Color Palette</h6>
+      <div class="d-flex align-items-center gap-3">
+        {% for col in image.colors %}
+        <div class="text-center">
+          <div class="color-swatch btn-copy" data-copy-text="{{ col.hex_code }}" style="background-color: {{ col.hex_code }};" title="Click to copy {{ col.hex_code }}"></div>
+          <div class="small fw-semibold mt-1 text-white" style="font-size:0.75rem;">{{ col.hex_code }}</div>
+          <div class="text-muted" style="font-size:0.7rem;">{{ col.percentage }}%</div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- 5. Quality Score & Metadata -->
+    <div class="glass-card p-4">
+      <h6 class="text-muted text-uppercase small mb-3"><i class="bi bi-sliders me-2"></i>Quality & Metadata Metrics</h6>
+      <div class="row g-3 text-center">
+        <div class="col-6">
+          <div class="p-3 border border-secondary border-opacity-25 rounded-3 bg-dark bg-opacity-50">
+            <div class="text-muted small">Quality Score</div>
+            <div class="fs-3 fw-bold text-cyan">{{ image.quality_score }}/100</div>
+          </div>
+        </div>
+        <div class="col-6">
+          <div class="p-3 border border-secondary border-opacity-25 rounded-3 bg-dark bg-opacity-50">
+            <div class="text-muted small">Dimensions</div>
+            <div class="fs-5 fw-bold text-white mt-1">{{ image.image_width }} x {{ image.image_height }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Modal: Add to Collection -->
+<div class="modal fade" id="addToCollectionModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content glass-card border-secondary text-white">
+      <div class="modal-header border-secondary border-opacity-25">
+        <h5 class="modal-title font-heading"><i class="bi bi-folder-plus text-cyan me-2"></i>Add to Collection</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form class="form-add-collection">
+        <div class="modal-body">
+          <input type="hidden" name="image_id" value="{{ image.id }}">
+          <div class="mb-3">
+            <label class="form-label text-muted small">Select Collection Folder</label>
+            <select name="collection_id" class="form-select glass-input text-white" required>
+              {% for col in collections %}
+                <option value="{{ col.id }}">{{ col.collection_name }} ({{ col.images.count() }} items)</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer border-secondary border-opacity-25">
+          <button type="button" class="btn btn-dark" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-gradient">Add Image</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/boundingbox.js') }}"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const objectsData = {{ image.objects|map(attribute='to_dict')|list|tojson }};
+    renderBoundingBoxes('boundingBoxCanvas', 'detailImage', objectsData);
+  });
+</script>
+{% endblock %}

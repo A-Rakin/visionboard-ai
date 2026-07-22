@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}AI Visual Search Results — VisionBoard AI{% endblock %}
+
+{% block content %}
+<div class="glass-card p-4 mb-4">
+  <h4 class="text-white font-heading mb-3"><i class="bi bi-search text-cyan me-2"></i>Natural Language & Reverse Color AI Search</h4>
+  
+  <form action="{{ url_for('dashboard.search') }}" method="GET" class="row g-3">
+    <div class="col-md-9">
+      <input type="text" name="q" value="{{ query }}" class="form-control glass-input" placeholder="Type natural language query e.g. 'Laptop on office desk', 'Dog running in park', 'Sunset beach'...">
+    </div>
+    <div class="col-md-3">
+      <button type="submit" class="btn btn-gradient w-100 py-2">
+        <i class="bi bi-stars me-1"></i> AI Semantic Search
+      </button>
+    </div>
+  </form>
+
+  <!-- Reverse Color Search Bar -->
+  <div class="mt-3 pt-3 border-top border-secondary border-opacity-25 d-flex align-items-center gap-2 flex-wrap">
+    <span class="text-muted small me-2">Reverse Color Search:</span>
+    {% for hex_val in ['#00F2FE', '#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#EC4899', '#8B5CF6', '#FFFFFF', '#000000'] %}
+      <a href="{{ url_for('dashboard.search', color=hex_val) }}" class="color-swatch" style="background-color: {{ hex_val }}; width: 28px; height: 28px;" title="Search dominated by {{ hex_val }}"></a>
+    {% endfor %}
+  </div>
+</div>
+
+{% if query or color %}
+<div class="d-flex align-items-center justify-content-between mb-4">
+  <h5 class="text-white font-heading mb-0">
+    {% if query %}
+      Results for Natural Language Query: <span class="text-gradient">"{{ query }}"</span>
+    {% elif color %}
+      Results for Dominant Color: <span class="badge p-2" style="background-color: {{ color }};">{{ color }}</span>
+    {% endif %}
+  </h5>
+  <span class="text-muted small">{{ results|length }} Matching Results</span>
+</div>
+
+{% if results %}
+<section class="masonry-grid">
+  {% for item in results %}
+  <div class="masonry-item glass-card">
+    <img src="{{ url_for('dashboard.serve_upload', filename=item.image.image_name) }}" alt="{{ item.image.original_filename }}">
+    <div class="masonry-overlay">
+      <div class="d-flex justify-content-between align-items-center">
+        <span class="badge bg-cyan text-dark font-mono fw-bold">{{ item.sim_score }}% Match</span>
+      </div>
+      <div>
+        <p class="text-white small fw-semibold mb-1">{{ item.image.captions[0].generated_caption if item.image.captions else item.image.original_filename }}</p>
+        <a href="{{ url_for('dashboard.image_detail', image_id=item.image.id) }}" class="btn btn-sm btn-gradient py-1 px-3 w-100 mt-2">
+          View Insights
+        </a>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</section>
+{% else %}
+<div class="text-center py-5 glass-card">
+  <i class="bi bi-search display-1 text-muted opacity-50 mb-3"></i>
+  <h4 class="text-white font-heading">No Matching Images Found</h4>
+  <p class="text-muted">Try adjusting your natural language query or uploading more photos to expand vector search coverage.</p>
+</div>
+{% endif %}
+{% endif %}
+{% endblock %}

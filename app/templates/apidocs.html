@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% block title %}REST API Documentation — VisionBoard AI{% endblock %}
+
+{% block content %}
+<div class="glass-card p-4 mb-4">
+  <div class="d-flex align-items-center justify-content-between">
+    <div>
+      <h3 class="text-white font-heading mb-1"><i class="bi bi-code-slash text-cyan me-2"></i>VisionBoard AI REST API</h3>
+      <p class="text-muted small mb-0">Full REST API endpoints for image processing, AI captioning, OCR, object detection, and vector similarity search.</p>
+    </div>
+    <span class="badge bg-primary bg-opacity-25 text-cyan fs-6">v1.0 OpenAPI Spec</span>
+  </div>
+</div>
+
+<div class="row g-4">
+  <!-- Endpoint Card 1: POST /api/upload -->
+  <div class="col-lg-6">
+    <div class="glass-card p-4 h-100">
+      <div class="d-flex align-items-center gap-2 mb-3">
+        <span class="badge bg-success px-3 py-2 fw-bold">POST</span>
+        <code class="text-cyan fs-5">/api/upload</code>
+      </div>
+      <p class="text-muted small">Upload an image file (`multipart/form-data`) to execute the full AI Pipeline (YOLOv8, BLIP, EasyOCR, K-Means & CLIP embeddings).</p>
+      
+      <h6 class="text-white small fw-bold mt-3">Request Body:</h6>
+      <pre class="bg-black p-3 rounded text-success small">image: [binary image file (.jpg, .png, .webp)]</pre>
+
+      <h6 class="text-white small fw-bold">Response JSON:</h6>
+      <pre class="bg-black p-3 rounded text-cyan small" style="max-height: 150px; overflow-y: auto;">
+{
+  "status": "success",
+  "image_id": 1,
+  "data": {
+    "caption": "A young man working on a laptop in an office.",
+    "objects": [{"object_name": "Laptop", "confidence": 0.98, ...}],
+    "quality_score": 88.5
+  }
+}</pre>
+    </div>
+  </div>
+
+  <!-- Endpoint Card 2: GET /api/search -->
+  <div class="col-lg-6">
+    <div class="glass-card p-4 h-100">
+      <div class="d-flex align-items-center gap-2 mb-3">
+        <span class="badge bg-primary px-3 py-2 fw-bold">GET</span>
+        <code class="text-cyan fs-5">/api/search</code>
+      </div>
+      <p class="text-muted small">Natural language semantic search using CLIP 512-d text vector embeddings and Cosine Similarity.</p>
+      
+      <h6 class="text-white small fw-bold mt-3">Query Parameters:</h6>
+      <pre class="bg-black p-3 rounded text-warning small">?q=Laptop on office desk</pre>
+
+      <h6 class="text-white small fw-bold">Response JSON:</h6>
+      <pre class="bg-black p-3 rounded text-cyan small" style="max-height: 150px; overflow-y: auto;">
+{
+  "query": "Laptop on office desk",
+  "count": 3,
+  "results": [
+    { "similarity_score": 92.4, "image": { ... } }
+  ]
+}</pre>
+    </div>
+  </div>
+
+  <!-- Endpoint Card 3: GET /api/object/<id> -->
+  <div class="col-lg-6">
+    <div class="glass-card p-4 h-100">
+      <div class="d-flex align-items-center gap-2 mb-3">
+        <span class="badge bg-primary px-3 py-2 fw-bold">GET</span>
+        <code class="text-cyan fs-5">/api/object/&lt;image_id&gt;</code>
+      </div>
+      <p class="text-muted small">Retrieve YOLOv8 detected objects and normalized bounding box coordinates.</p>
+      <pre class="bg-black p-3 rounded text-cyan small">
+{
+  "image_id": 1,
+  "detected_objects": [
+    {"object_name": "Laptop", "confidence": 0.98, "box": {"x": 0.1, "y": 0.2, "width": 0.5, "height": 0.4}}
+  ]
+}</pre>
+    </div>
+  </div>
+
+  <!-- Endpoint Card 4: GET /api/caption/<id> -->
+  <div class="col-lg-6">
+    <div class="glass-card p-4 h-100">
+      <div class="d-flex align-items-center gap-2 mb-3">
+        <span class="badge bg-primary px-3 py-2 fw-bold">GET</span>
+        <code class="text-cyan fs-5">/api/caption/&lt;image_id&gt;</code>
+      </div>
+      <p class="text-muted small">Retrieve BLIP AI generated natural language descriptive caption.</p>
+      <pre class="bg-black p-3 rounded text-cyan small">
+{
+  "image_id": 1,
+  "caption": "A young man working on a laptop in an office.",
+  "confidence": 0.96
+}</pre>
+    </div>
+  </div>
+
+  <!-- Endpoint Card 5: GET /api/ocr/<id> -->
+  <div class="col-lg-6">
+    <div class="glass-card p-4 h-100">
+      <div class="d-flex align-items-center gap-2 mb-3">
+        <span class="badge bg-primary px-3 py-2 fw-bold">GET</span>
+        <code class="text-cyan fs-5">/api/ocr/&lt;image_id&gt;</code>
+      </div>
+      <p class="text-muted small">Retrieve EasyOCR extracted text strings embedded in the image.</p>
+      <pre class="bg-black p-3 rounded text-cyan small">
+{
+  "image_id": 1,
+  "extracted_text": [{"text": "VISIONBOARD", "confidence": 0.98}]
+}</pre>
+    </div>
+  </div>
+
+  <!-- Endpoint Card 6: GET /api/reports/<id> -->
+  <div class="col-lg-6">
+    <div class="glass-card p-4 h-100">
+      <div class="d-flex align-items-center gap-2 mb-3">
+        <span class="badge bg-info text-dark px-3 py-2 fw-bold">GET / DOWNLOAD</span>
+        <code class="text-cyan fs-5">/api/reports/&lt;image_id&gt;</code>
+      </div>
+      <p class="text-muted small">Generates and returns the downloadable PDF AI Intelligence Report for the given image.</p>
+      <pre class="bg-black p-3 rounded text-success small">Returns: application/pdf binary download</pre>
+    </div>
+  </div>
+</div>
+{% endblock %}

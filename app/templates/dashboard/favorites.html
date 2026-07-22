@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}My Favorites — VisionBoard AI{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-4">
+  <h3 class="text-white font-heading mb-0"><i class="bi bi-heart-fill text-danger me-2"></i>My Saved Favorites</h3>
+  <span class="text-muted small">{{ images|length }} Saved Items</span>
+</div>
+
+{% if images %}
+<section class="masonry-grid">
+  {% for img in images %}
+  <div class="masonry-item glass-card">
+    <img src="{{ url_for('dashboard.serve_upload', filename=img.image_name) }}" alt="{{ img.original_filename }}">
+    <div class="masonry-overlay">
+      <div class="d-flex justify-content-between align-items-center">
+        <span class="badge bg-dark bg-opacity-75 text-white">Quality: {{ img.quality_score }}/100</span>
+        <button class="btn btn-sm btn-dark rounded-circle btn-favorite" data-image-id="{{ img.id }}">
+          <i class="bi bi-heart-fill text-danger"></i>
+        </button>
+      </div>
+      <div>
+        <p class="text-white small fw-semibold mb-1">{{ img.captions[0].generated_caption if img.captions else img.original_filename }}</p>
+        <a href="{{ url_for('dashboard.image_detail', image_id=img.id) }}" class="btn btn-sm btn-gradient py-1 px-3 w-100 mt-2">
+          View Insights
+        </a>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</section>
+{% else %}
+<div class="text-center py-5 glass-card">
+  <i class="bi bi-heart display-1 text-muted opacity-50 mb-3"></i>
+  <h4 class="text-white font-heading">No Favorites Saved Yet</h4>
+  <p class="text-muted">Click the heart icon on any image card to save it to your favorites!</p>
+</div>
+{% endif %}
+{% endblock %}

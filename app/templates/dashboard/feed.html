@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard Library — VisionBoard AI{% endblock %}
+
+{% block content %}
+<!-- Upload Dropzone Modal/Section -->
+<section id="uploadSection" class="glass-card p-4 mb-5">
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <h4 class="text-white font-heading mb-0"><i class="bi bi-cloud-arrow-up text-cyan me-2"></i>Upload Image to AI Pipeline</h4>
+    <span class="badge bg-primary bg-opacity-25 text-cyan border border-primary border-opacity-50">Automatic Multi-Model Analysis</span>
+  </div>
+
+  <div class="upload-dropzone" id="dropzone">
+    <i class="bi bi-cloud-plus-fill display-3 text-gradient mb-3"></i>
+    <h5 class="fw-bold mb-1">Click to Upload or Drag & Drop Image Here</h5>
+    <p class="text-muted small">Supported Formats: JPG, PNG, WEBP. Automatic Object Detection, BLIP Caption, EasyOCR & CLIP Vector Embeddings.</p>
+    <input type="file" id="fileInput" name="image" class="d-none" accept="image/*">
+  </div>
+  <div id="uploadStatus"></div>
+</section>
+
+<!-- Popular Category Filter Pills -->
+<section class="mb-4 d-flex align-items-center justify-content-between flex-wrap gap-2">
+  <div>
+    <a href="{{ url_for('dashboard.feed') }}" class="category-pill {% if not current_category %}active{% endif %}">
+      <i class="bi bi-grid-fill me-1"></i> All Images
+    </a>
+    {% for cat in popular_categories %}
+      <a href="{{ url_for('dashboard.feed', category=cat) }}" class="category-pill {% if current_category == cat %}active{% endif %}">
+        <i class="bi bi-tag-fill me-1"></i> {{ cat }}
+      </a>
+    {% endfor %}
+  </div>
+  <span class="text-muted small"><i class="bi bi-images me-1"></i> Total {{ images|length }} Images</span>
+</section>
+
+<!-- Pinterest Masonry Grid -->
+{% if images %}
+<section class="masonry-grid">
+  {% for img in images %}
+  <div class="masonry-item glass-card">
+    <img src="{{ url_for('dashboard.serve_upload', filename=img.image_name) }}" alt="{{ img.original_filename }}" loading="lazy">
+    
+    <div class="masonry-overlay">
+      <div class="d-flex justify-content-between align-items-center">
+        <span class="badge bg-dark bg-opacity-75 text-white border border-secondary border-opacity-50">
+          <i class="bi bi-star-fill text-warning me-1"></i> {{ img.quality_score }}/100
+        </span>
+        <button class="btn btn-sm btn-dark rounded-circle btn-favorite border border-secondary border-opacity-50" data-image-id="{{ img.id }}" title="Save to Favorites">
+          <i class="bi {% if img.is_favorite %}bi-heart-fill text-danger{% else %}bi-heart{% endif %}"></i>
+        </button>
+      </div>
+
+      <div>
+        {% if img.captions %}
+          <p class="text-white small fw-semibold mb-1 line-clamp-2">{{ img.captions[0].generated_caption }}</p>
+        {% else %}
+          <p class="text-white small fw-semibold mb-1">{{ img.original_filename }}</p>
+        {% endif %}
+
+        <div class="d-flex align-items-center justify-content-between mt-2">
+          <span class="badge bg-cyan bg-opacity-25 text-cyan" style="font-size: 0.75rem;">
+            <i class="bi bi-box-seam me-1"></i> {{ img.objects|length }} Objects
+          </span>
+          <a href="{{ url_for('dashboard.image_detail', image_id=img.id) }}" class="btn btn-sm btn-gradient py-1 px-3" style="font-size: 0.8rem;">
+            AI Insights <i class="bi bi-arrow-right ms-1"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</section>
+{% else %}
+<div class="text-center py-5 glass-card">
+  <i class="bi bi-images display-1 text-muted opacity-50 mb-3"></i>
+  <h4 class="text-white font-heading">No Images Found</h4>
+  <p class="text-muted">Upload your first image above to trigger the VisionBoard AI visual engine!</p>
+</div>
+{% endif %}
+{% endblock %}
