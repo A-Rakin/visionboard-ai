@@ -195,7 +195,7 @@
 <script src="{{ url_for('static', filename='js/boundingbox.js') }}"></script>
 <script>
   document.addEventListener('DOMContentLoaded', () => {
-    const objectsData = {{ image.objects|map(attribute='to_dict')|list|tojson }};
+    const objectsData = {{ objects_data|tojson }};
     renderBoundingBoxes('boundingBoxCanvas', 'detailImage', objectsData);
   });
 </script>

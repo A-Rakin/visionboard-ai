@@ -26,8 +26,9 @@ def generate_ai_pdf_report(image_model, output_path):
             f.write(f"Colors: {[c.hex_code for c in image_model.colors]}\n")
         return output_path
 
-    
+    doc = SimpleDocTemplate(output_path, pagesize=letter, rightMargin=36, leftMargin=36, topMargin=36, bottomMargin=36)
     styles = getSampleStyleSheet()
+
     
     title_style = ParagraphStyle(
         'DocTitle',

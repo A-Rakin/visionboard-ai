@@ -73,13 +73,14 @@ def image_detail(image_id):
             
             # Sort by similarity descending
             scored_list.sort(key=lambda x: x[0], reverse=True)
-            similar_images = [{'sim_score': round(s * 100, 1), 'image': im} for s, im in scored_list[:10]]
-
+    objects_data = [obj.to_dict() for obj in img.objects]
 
     return render_template('dashboard/image_detail.html', 
                            image=img, 
                            collections=user_collections,
-                           similar_images=similar_images)
+                           similar_images=similar_images,
+                           objects_data=objects_data)
+
 
 @dashboard_bp.route('/image/<int:image_id>/favorite', methods=['POST'])
 @login_required
