@@ -178,17 +178,18 @@ def analytics():
     user_id = current_user.id
     total_images = Image.query.filter_by(user_id=user_id).count()
     
-    # Objects breakdown
-    top_objects = db.session.query(
+    top_objects_query = db.session.query(
         DetectedObject.object_name, 
         func.count(DetectedObject.id).label('count')
     ).join(Image).filter(Image.user_id == user_id).group_by(DetectedObject.object_name).order_by(func.count(DetectedObject.id).desc()).limit(8).all()
+    top_objects = [(r[0], r[1]) for r in top_objects_query]
 
     # Dominant Colors breakdown
-    top_colors = db.session.query(
+    top_colors_query = db.session.query(
         DominantColor.hex_code,
         func.count(DominantColor.id).label('count')
     ).join(Image).filter(Image.user_id == user_id).group_by(DominantColor.hex_code).order_by(func.count(DominantColor.id).desc()).limit(6).all()
+    top_colors = [(r[0], r[1]) for r in top_colors_query]
 
     avg_quality = db.session.query(func.avg(Image.quality_score)).filter(Image.user_id == user_id).scalar() or 0.0
 
@@ -197,6 +198,7 @@ def analytics():
                            top_objects=top_objects,
                            top_colors=top_colors,
                            avg_quality=round(avg_quality, 1))
+
 
 @dashboard_bp.route('/image/<int:image_id>/download_report')
 @login_required
