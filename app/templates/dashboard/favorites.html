@@ -20,9 +20,12 @@
           <i class="bi bi-heart-fill text-danger"></i>
         </button>
       </div>
+
       <div>
-        <p class="text-white small fw-semibold mb-1">{{ img.captions[0].generated_caption if img.captions else img.original_filename }}</p>
-        <a href="{{ url_for('dashboard.image_detail', image_id=img.id) }}" class="btn btn-sm btn-gradient py-1 px-3 w-100 mt-2">
+        <p class="text-white small fw-semibold mb-1">{{ img.captions[0].generated_caption if img.captions else
+          img.original_filename }}</p>
+        <a href="{{ url_for('dashboard.image_detail', image_id=img.id) }}"
+          class="btn btn-sm btn-gradient py-1 px-3 w-100 mt-2">
           View Insights
         </a>
       </div>
