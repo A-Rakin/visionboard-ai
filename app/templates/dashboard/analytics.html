@@ -4,7 +4,8 @@
 
 {% block content %}
 <div class="d-flex align-items-center justify-content-between mb-4">
-  <h3 class="text-white font-heading mb-0"><i class="bi bi-pie-chart-fill text-gradient me-2"></i>Visual AI Analytics Dashboard</h3>
+  <h3 class="text-white font-heading mb-0"><i class="bi bi-pie-chart-fill text-gradient me-2"></i>Visual AI Analytics
+    Dashboard</h3>
   <span class="badge bg-primary bg-opacity-25 text-cyan">Real-time Statistics</span>
 </div>
 
@@ -39,7 +40,8 @@
   <!-- Top Detected Objects Chart -->
   <div class="col-lg-6">
     <div class="glass-card p-4 h-100">
-      <h5 class="text-white font-heading mb-4"><i class="bi bi-bar-chart-line-fill text-cyan me-2"></i>Most Frequent Detected Objects</h5>
+      <h5 class="text-white font-heading mb-4"><i class="bi bi-bar-chart-line-fill text-cyan me-2"></i>Most Frequent
+        Detected Objects</h5>
       <div style="height: 300px;">
         <canvas id="objectsChart"></canvas>
       </div>
@@ -49,7 +51,8 @@
   <!-- Dominant Colors Distribution Chart -->
   <div class="col-lg-6">
     <div class="glass-card p-4 h-100">
-      <h5 class="text-white font-heading mb-4"><i class="bi bi-palette-fill text-pink me-2"></i>Dominant Palette Distribution</h5>
+      <h5 class="text-white font-heading mb-4"><i class="bi bi-palette-fill text-pink me-2"></i>Dominant Palette
+        Distribution</h5>
       <div style="height: 300px;">
         <canvas id="colorsChart"></canvas>
       </div>
@@ -62,9 +65,10 @@
 <script src="{{ url_for('static', filename='js/analytics.js') }}"></script>
 <script>
   document.addEventListener('DOMContentLoaded', () => {
-    const objectData = {{ top_objects|tojson }};
-    const colorData = {{ top_colors|tojson }};
-    initAnalyticsCharts(objectData, colorData);
+    const objectData = {{ top_objects| tojson
+  }};
+  const colorData = {{ top_colors| tojson }};
+  initAnalyticsCharts(objectData, colorData);
   });
 </script>
 {% endblock %}
